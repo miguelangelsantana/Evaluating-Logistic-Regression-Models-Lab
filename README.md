@@ -39,19 +39,148 @@ df = pd.read_csv('heart.csv')
 df.head()
 ```
 
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>sex</th>
+      <th>cp</th>
+      <th>trestbps</th>
+      <th>chol</th>
+      <th>fbs</th>
+      <th>restecg</th>
+      <th>thalach</th>
+      <th>exang</th>
+      <th>oldpeak</th>
+      <th>slope</th>
+      <th>ca</th>
+      <th>thal</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>63</td>
+      <td>1</td>
+      <td>3</td>
+      <td>145</td>
+      <td>233</td>
+      <td>1</td>
+      <td>0</td>
+      <td>150</td>
+      <td>0</td>
+      <td>2.3</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>37</td>
+      <td>1</td>
+      <td>2</td>
+      <td>130</td>
+      <td>250</td>
+      <td>0</td>
+      <td>1</td>
+      <td>187</td>
+      <td>0</td>
+      <td>3.5</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>41</td>
+      <td>0</td>
+      <td>1</td>
+      <td>130</td>
+      <td>204</td>
+      <td>0</td>
+      <td>0</td>
+      <td>172</td>
+      <td>0</td>
+      <td>1.4</td>
+      <td>2</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>56</td>
+      <td>1</td>
+      <td>1</td>
+      <td>120</td>
+      <td>236</td>
+      <td>0</td>
+      <td>1</td>
+      <td>178</td>
+      <td>0</td>
+      <td>0.8</td>
+      <td>2</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>57</td>
+      <td>0</td>
+      <td>0</td>
+      <td>120</td>
+      <td>354</td>
+      <td>0</td>
+      <td>1</td>
+      <td>163</td>
+      <td>1</td>
+      <td>0.6</td>
+      <td>2</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 Split the data first into `X` and `y`, and then into training and test sets. Assign 25% to the test set and set the `random_state` to 0. 
 
 
 ```python
 # Import train_test_split
-
+from sklearn.model_selection import train_test_split
 
 # Split data into X and y
-y = None
-X = None
+y = df['target']
+X = df.drop(columns=['target'], axis=1)
 
 # Split the data into a training and a test set
-X_train, X_test, y_train, y_test = None
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 ```
 
 ## Build a vanilla logistic regression model
@@ -63,23 +192,37 @@ X_train, X_test, y_train, y_test = None
 
 ```python
 # Import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 
-
-# Instantiate LogisticRegression
-logreg = None
+# Instantiate LogisticRegression 
+logreg = LogisticRegression(fit_intercept=False, C=1e12, solver='liblinear')
 
 # Fit to training data
-model_log = None
+model_log = logreg.fit(X_train, y_train)
 model_log
 ```
+
+
+
+
+    LogisticRegression(C=1000000000000.0, class_weight=None, dual=False,
+                       fit_intercept=False, intercept_scaling=1, l1_ratio=None,
+                       max_iter=100, multi_class='warn', n_jobs=None, penalty='l2',
+                       random_state=None, solver='liblinear', tol=0.0001, verbose=0,
+                       warm_start=False)
+
+
 
 ## Write a function to calculate the precision
 
 
 ```python
 def precision(y, y_hat):
-    # Your code here
-    pass
+    # Could also use confusion matrix
+    y_y_hat = list(zip(y, y_hat))
+    tp = sum([1 for i in y_y_hat if i[0] == 1 and i[1] == 1])
+    fp = sum([1 for i in y_y_hat if i[0] == 0 and i[1] == 1])
+    return tp / float(tp + fp)
 ```
 
 ## Write a function to calculate the recall
@@ -87,8 +230,11 @@ def precision(y, y_hat):
 
 ```python
 def recall(y, y_hat):
-    # Your code here
-    pass
+    # Could also use confusion matrix
+    y_y_hat = list(zip(y, y_hat))
+    tp = sum([1 for i in y_y_hat if i[0] == 1 and i[1] == 1])
+    fn = sum([1 for i in y_y_hat if i[0] == 1 and i[1] == 0])
+    return tp / float(tp + fn)
 ```
 
 ## Write a function to calculate the accuracy
@@ -96,17 +242,23 @@ def recall(y, y_hat):
 
 ```python
 def accuracy(y, y_hat):
-    # Your code here
-    pass
+    # Could also use confusion matrix
+    y_y_hat = list(zip(y, y_hat))
+    tp = sum([1 for i in y_y_hat if i[0] == 1 and i[1] == 1])
+    tn = sum([1 for i in y_y_hat if i[0] == 0 and i[1] == 0])
+    return (tp + tn) / float(len(y_hat))
 ```
 
 ## Write a function to calculate the F1 score
 
 
 ```python
-def f1_score(y, y_hat):
-    # Your code here
-    pass
+def f1(y, y_hat):
+    precision_score = precision(y, y_hat)
+    recall_score = recall(y, y_hat)
+    numerator = precision_score * recall_score
+    denominator = precision_score + recall_score
+    return 2 * (numerator / denominator)
 ```
 
 ## Calculate the precision, recall, accuracy, and F1 score of your classifier 
@@ -115,10 +267,43 @@ Do this for both the training and test sets.
 
 
 ```python
-# Your code here
-y_hat_train = None
-y_hat_test = None
+y_hat_train = logreg.predict(X_train)
+y_hat_test = logreg.predict(X_test)
+
+print('Training Precision: ', precision(y_train, y_hat_train))
+print('Testing Precision: ', precision(y_test, y_hat_test))
+print('\n\n')
+
+print('Training Recall: ', recall(y_train, y_hat_train))
+print('Testing Recall: ', recall(y_test, y_hat_test))
+print('\n\n')
+
+print('Training Accuracy: ', accuracy(y_train, y_hat_train))
+print('Testing Accuracy: ', accuracy(y_test, y_hat_test))
+print('\n\n')
+
+print('Training F1-Score: ', f1(y_train, y_hat_train))
+print('Testing F1-Score: ', f1(y_test, y_hat_test))
 ```
+
+    Training Precision:  0.8396946564885496
+    Testing Precision:  0.8125
+    
+    
+    
+    Training Recall:  0.9016393442622951
+    Testing Recall:  0.9069767441860465
+    
+    
+    
+    Training Accuracy:  0.8546255506607929
+    Testing Accuracy:  0.8289473684210527
+    
+    
+    
+    Training F1-Score:  0.8695652173913043
+    Testing F1-Score:  0.8571428571428572
+
 
 Great job! Now it's time to check your work with `sklearn`. 
 
@@ -137,8 +322,42 @@ Compare the results of your performance metrics functions above with the `sklear
 
 
 ```python
-# Your code here
+from sklearn.metrics import precision_score, recall_score, accuracy_score, f1_score
+
+print('Training Precision: ', precision_score(y_train, y_hat_train))
+print('Testing Precision: ', precision_score(y_test, y_hat_test))
+print('\n\n')
+
+print('Training Recall: ', recall_score(y_train, y_hat_train))
+print('Testing Recall: ', recall_score(y_test, y_hat_test))
+print('\n\n')
+
+print('Training Accuracy: ', accuracy_score(y_train, y_hat_train))
+print('Testing Accuracy: ', accuracy_score(y_test, y_hat_test))
+print('\n\n')
+
+print('Training F1-Score: ', f1_score(y_train, y_hat_train))
+print('Testing F1-Score: ', f1_score(y_test, y_hat_test))
 ```
+
+    Training Precision:  0.8396946564885496
+    Testing Precision:  0.8125
+    
+    
+    
+    Training Recall:  0.9016393442622951
+    Testing Recall:  0.9069767441860465
+    
+    
+    
+    Training Accuracy:  0.8546255506607929
+    Testing Accuracy:  0.8289473684210527
+    
+    
+    
+    Training F1-Score:  0.8695652173913043
+    Testing F1-Score:  0.8571428571428572
+
 
 Nicely done! Did the results from `sklearn` match that of your own? 
 
@@ -164,14 +383,21 @@ training_f1 = []
 testing_f1 = []
 
 for i in range(10, 95):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= None) # replace the "None" here
-    logreg = LogisticRegression(fit_intercept=False, C=1e20, solver='liblinear')
-    model_log = None
-    y_hat_test = None
-    y_hat_train = None 
-    
-    # Your code here
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=i/100.0)
+    logreg = LogisticRegression(fit_intercept=False, C=1e25, solver='liblinear')
+    model_log = logreg.fit(X_train, y_train)
+    y_hat_test = logreg.predict(X_test)
+    y_hat_train = logreg.predict(X_train)
 
+    training_precision.append(precision(y_train, y_hat_train))
+    testing_precision.append(precision(y_test, y_hat_test))
+    training_recall.append(recall(y_train, y_hat_train))
+    testing_recall.append(recall(y_test, y_hat_test))
+    training_accuracy.append(accuracy(y_train, y_hat_train))
+    testing_accuracy.append(accuracy(y_test, y_hat_test))
+    training_f1.append(f1(y_train, y_hat_train))
+    testing_f1.append(f1(y_test, y_hat_test))
+    
 ```
 
 Create four scatter plots looking at the train and test precision in the first one, train and test recall in the second one, train and test accuracy in the third one, and train and test F1 score in the fourth one. 
@@ -188,19 +414,47 @@ plt.show()
 ```
 
 
+![png](index_files/index_26_0.png)
+
+
+
 ```python
 # Train and test recall
+plt.scatter(list(range(10, 95)), training_recall, label='training_recall')
+plt.scatter(list(range(10, 95)), testing_recall, label='testing_recall')
+plt.legend()
+plt.show()
 ```
+
+
+![png](index_files/index_27_0.png)
+
 
 
 ```python
 # Train and test accuracy
+plt.scatter(list(range(10, 95)), training_accuracy, label='training_accuracy')
+plt.scatter(list(range(10, 95)), testing_accuracy, label='testing_accuracy')
+plt.legend()
+plt.show()
 ```
+
+
+![png](index_files/index_28_0.png)
+
 
 
 ```python
 # Train and test F1 score
+plt.scatter(list(range(10, 95)), training_f1, label='training_f1')
+plt.scatter(list(range(10, 95)), testing_f1, label='testing_f1')
+plt.legend()
+plt.show()
 ```
+
+
+![png](index_files/index_29_0.png)
+
 
 ## Summary
 
